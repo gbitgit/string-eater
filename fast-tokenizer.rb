@@ -43,6 +43,20 @@ class FastTokenizer
     end
   end
 
+  def find_end_of token, string
+    0
+  end
+
+  def find_breakpoints(string)
+    tokens.inject([]) do |breakpoints, t|
+      breakpoints << find_end_of t, string
+    end
+  end
+
+  def tokenize! string
+    breakpoints = fink_breakpoints(string)
+  end
+
 end
 
 class NginxLogTokenizer < FastTokenizer
