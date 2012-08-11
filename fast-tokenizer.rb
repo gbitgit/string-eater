@@ -1,74 +1,61 @@
-require 'awesome_print'
+class FastToken
+  attr_accessor :name, :string, :opts
+end
+
+class FastField < FastToken
+  def initialize(name, opts)
+    @name = name
+    @opts = opts
+  end
+
+  def extract?
+    opts[:extract]
+  end
+end
+
+class FastSeparator < FastToken
+  def initialize(string)
+    @string = string
+  end
+end
 
 class FastTokenizer
-  def self.fields
-    @fields ||= []
-  end
 
-  def self.token_separators
-    @token_separators ||= []
-  end
-
-  def self.token_names
-    @token_names ||= {}
+  def self.tokens
+    @tokens ||= []
   end
 
   def self.add_field name, opts={}
-    opts[:inside] = "\"\"" if (opts[:inside] == :quotes)
-    look_for(opts[:inside][0]) if opts[:inside]
-
-    capture(name, opts[:type]) unless opts[:ignore]
-
-    look_for(opts[:inside][-1]) if opts[:inside]
-    look_for(" ")
+    self.tokens << FastField.new(name, opts)
   end
 
   def self.look_for tokens
-    tokens.each_char do |token|
-      look_for_token token
+    self.tokens << FastSeparator.new(tokens)
+  end
+
+  def tokens
+    self.class.tokens
+  end
+
+  def describe_line
+    tokens.inject("") do |desc, t|
+      desc << (t.string || t.name.to_s || "xxxxxx")
     end
   end
 
-  def self.look_for_token token
-    puts "look_for_token: #{token}"
-    token_separators << token
-    token_names << nil
-  end
-
-  def self.capture name, ignore=nil, type=:string
-    token_names[] = [ignore, name, type, position]
-  end
-
-  def token_separators
-    self.class.token_separators.dup
-  end
-
-  def self.describe_line
-    desc = ""
-    token_separators.each_with_index do |sep, i|
-      t = (token_names[i] || "xxxx").to_s
-      puts "[#{t}]"
-      desc << t
-      desc << sep
-    end
-    desc
-  end
 end
 
-class NginxTokenizer < FastTokenizer
+class NginxLogTokenizer < FastTokenizer
   add_field :ip
-  look_for "- "
-  add_field :remote_user, :ignore => true
-  add_field :local_time, :inside => "[]", :ignore => true
-  add_field :request, :inside => :quotes
+  look_for " - "
+  add_field :remote_user, :extract => false
+  look_for " ["
+  add_field :timestamp, :extract => false
+  look_for "] \""
+  add_field :request
+  look_for "\" "
   add_field :status, :type => :integer
-  add_field :rest, :ignore => true
-
-  ap self.token_separators
-  ap self.token_names
-  puts self.token_separators.join
-
+  look_for " "
 end
 
-puts NginxTokenizer.describe_line
-
+puts NginxLogTokenizer.new.describe_line
