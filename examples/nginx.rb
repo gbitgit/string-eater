@@ -13,6 +13,14 @@ class NginxLogTokenizer < StringEater::Tokenizer
   look_for "\" "
   add_field :status, :type => :integer
   look_for " "
+
+  split_field :request do
+    add_field :request_verb
+    look_for " "
+    add_field :request_url
+    look_for " "
+    add_field :request_etc, :extract => false
+  end
 end
 
 tokenizer = NginxLogTokenizer.new

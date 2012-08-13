@@ -5,6 +5,7 @@ module StringEater
 
     def initialize
       @opts = {}
+      @children = []
     end
 
     def extract?
