@@ -67,7 +67,8 @@ module StringEater
       @extracted_tokens.clear
 
       breakpoints = find_breakpoints(string)
-      breakpoints[0...-1].each_index do |i|
+      last_important_bp = [breakpoints.length, tokens.size].min
+      (0...last_important_bp).each do |i|
         tokens[i].breakpoints = [breakpoints[i], breakpoints[i+1]]
       end
 

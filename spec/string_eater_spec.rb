@@ -49,6 +49,37 @@ describe Example1 do
       end
     end
 
+    it "should return everything to the end of the line for the last token" do
+      s = "c defg asdf | foo , baa"
+      @tokenizer.tokenize!("a b|#{s}").third_word.should == s
+    end
+
   end
 
 end
+
+# an example where we ignore after a certain point in the string
+class Example2 < StringEater::Tokenizer
+  add_field :first_word, :extract => false
+  look_for " "
+  add_field :second_word
+  look_for " "
+end
+
+describe Example2 do
+
+  before(:each) do
+    @tokenizer = Example2.new
+    @str1 = "foo bar baz"
+    @second_word1 = "bar"
+  end
+
+  describe "tokenize!" do
+    it "should find the token when there is extra stuff at the end of the string" do
+      @tokenizer.tokenize!(@str1).second_word.should == @second_word1
+    end
+  end
+
+end
+
+
