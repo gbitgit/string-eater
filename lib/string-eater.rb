@@ -1,24 +1,27 @@
 module StringEater
 
   class Token
-    attr_accessor :name, :string, :opts, :breakpoints
+    attr_accessor :name, :string, :opts, :breakpoints, :children
+
+    def initialize
+      @opts = {}
+    end
 
     def extract?
       @opts[:extract]
     end
-  end
 
-  class Field < Token
-    def initialize(name, opts)
-      @name = name
-      @opts = {:extract => true}.merge(opts)
+    def self.new_field(name, opts)
+      t = new
+      t.name = name
+      t.opts = {:extract => true}.merge(opts)
+      t
     end
-  end
 
-  class Separator < Token
-    def initialize(string)
-      @string = string
-      @opts = {}
+    def self.new_separator(string)
+      t = new
+      t.string = string
+      t
     end
   end
 
@@ -29,12 +32,12 @@ module StringEater
     end
 
     def self.add_field name, opts={}
-      self.tokens << Field.new(name, opts)
+      self.tokens << Token::new_field(name, opts)
       define_method(name) {@extracted_tokens[name]}
     end
 
     def self.look_for tokens
-      self.tokens << Separator.new(tokens)
+      self.tokens << Token::new_separator(tokens)
     end
 
     def tokens
