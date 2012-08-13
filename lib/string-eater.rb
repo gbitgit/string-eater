@@ -1,4 +1,4 @@
-module FastTokenizer
+module StringEater
 
   class Token
     attr_accessor :name, :string, :opts, :breakpoints

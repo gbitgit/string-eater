@@ -1,8 +1,8 @@
 $: << './lib'
 
-require 'fast-tokenizer'
+require 'string-eater'
 
-class NginxLogTokenizer < FastTokenizer::Tokenizer
+class NginxLogTokenizer < StringEater::Tokenizer
   add_field :ip
   look_for " - "
   add_field :remote_user, :extract => false
