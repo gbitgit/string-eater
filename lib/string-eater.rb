@@ -24,12 +24,17 @@ module StringEater
       t.string = string
       t
     end
+
   end
 
   class Tokenizer
 
+    def self.root_token
+      @root_token ||= Token.new
+    end
+
     def self.tokens
-      @tokens ||= []
+      self.root_token.children
     end
 
     def self.add_field name, opts={}
@@ -39,6 +44,10 @@ module StringEater
 
     def self.look_for tokens
       self.tokens << Token::new_separator(tokens)
+    end
+
+    def self.split_field parent_name
+      parent_token = self.tokens.find{|t| t.name == parent_name}
     end
 
     def tokens
