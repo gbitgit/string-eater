@@ -26,12 +26,12 @@ end
 tokenizer = NginxLogTokenizer.new
 puts tokenizer.describe_line
 
-str = "foo - bar [fing] \"futs\" 1234 asdfasdf asdf "
-puts str
-puts tokenizer.find_breakpoints(str).inspect
-tokenizer.tokenize!(str) do |tokens|
-  puts tokens.inspect
-end
-
-puts tokenizer.ip
+#str = "foo - bar [fing] \"futs\" 1234 asdfasdf asdf "
+#puts str
+#puts tokenizer.find_breakpoints(str).inspect
+#tokenizer.tokenize!(str) do |tokens|
+#  puts tokens.inspect
+#end
+#
+#puts tokenizer.ip
 

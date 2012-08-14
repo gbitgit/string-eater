@@ -1,6 +1,8 @@
 require 'spec_helper'
 require 'string-eater'
 
+require 'awesome_print'
+
 # normal use
 class Example1 < StringEater::Tokenizer
   add_field :first_word
@@ -82,4 +84,45 @@ describe Example2 do
 
 end
 
+# an example where we split a field
+class Example3 < StringEater::Tokenizer
+  add_field :first_word, :extract => false
+  look_for " \""
+  add_field :part_in_quotes
+  look_for "\""
 
+  split_field :part_in_quotes do
+    add_field :first_part
+    look_for " "
+    add_field :second_part
+  end
+end
+
+describe Example3 do
+  before(:each) do
+    @tokenizer = Example3.new
+    @str1 = 'foo "bar baz"'
+    @part_in_quotes = "bar baz"
+    @first_part = "bar"
+    @second_part = "baz"
+  end
+
+  it "should add child tokens to the split field" do
+    kids = @tokenizer.tokens.find{|t| t.name == :part_in_quotes}.children
+    kids.size.should == 3
+    kids[0].name.should == :first_part
+    kids[1].string.should == " "
+    kids[2].name.should == :second_part
+  end
+
+  describe "tokenize!" do
+    it "should still find the original field" do
+      @tokenizer.tokenize!(@str1).part_in_quotes.should == @part_in_quotes
+    end
+
+    it "should find the subtokens" do
+      @tokenizer.tokenize!(@str1).first_part.should == @first_part
+      @tokenizer.tokenize!(@str1).second_part.should == @second_part
+    end
+  end
+end
