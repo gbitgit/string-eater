@@ -9,20 +9,38 @@ class NginxLogTokenizer < StringEater::Tokenizer
   look_for " ["
   add_field :timestamp, :extract => false
   look_for "] \""
-  add_field :request
-  look_for "\" "
-  add_field :status, :type => :integer
+  add_field :request_verb, :extract => false
   look_for " "
+  add_field :request_url
+  look_for " "
+  add_field :request_etc, :extract => false
+  look_for "\" "
+  add_field :status_code
+  look_for " "
+  add_field :bytes_sent, :extract => false
+  look_for " \""
+  add_field :referrer_url
+  look_for "\" \""
+  add_field :user_agent
+  look_for "\" \""
+  add_field :compression, :extract => false
+  look_for "\" "
+  add_field :remainder
+
+  combine_fields :from => :request_verb, :to => :request_etc, :as => :request
 end
 
 tokenizer = NginxLogTokenizer.new
 puts tokenizer.describe_line
 
-str = "foo - bar [fing] \"futs\" 1234 asdfasdf asdf "
-puts str
-puts tokenizer.find_breakpoints(str).inspect
+str = '73.80.217.212 - - [01/Aug/2012:09:14:25 -0500] "GET /this_is_a_url HTTP/1.1" 304 152 "http://referrer.com" "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0)" "-" "there could be" other "stuff here"'
+puts "input string: " + str
+puts "found breakpoints: " + tokenizer.find_breakpoints(str).inspect
+puts "Tokens: "
 tokenizer.tokenize!(str) do |tokens|
-  puts tokens.inspect
+  tokens.each do |token|
+    puts "\t" + token.inspect
+  end
 end
 
 puts tokenizer.ip
