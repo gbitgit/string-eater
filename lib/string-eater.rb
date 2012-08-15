@@ -78,7 +78,7 @@ module StringEater
       @breakpoints[-1] = string.length
       start_point = 0
       @literal_tokens.each_with_index do |t, i|
-        @breakpoints[2*i+1],start_point = find_end_of(t, string, start_point)
+        @breakpoints[2*i+1], start_point = find_end_of(t, string, start_point)
         @breakpoints[2*i+2] = start_point
       end
       @breakpoints
@@ -117,7 +117,7 @@ module StringEater
     protected
 
     def find_end_of token, string, start_at
-      start = string.index(token.string, start_at) || string.length
+      start = string.index(token.string, start_at+1) || string.length
       [start, [start + token.string.length, string.length].min]
     end
 
