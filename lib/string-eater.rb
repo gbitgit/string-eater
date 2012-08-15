@@ -72,27 +72,30 @@ module StringEater
     end
 
     def find_breakpoints(string)
-      breakpoints = tokens.select{|t| t.string }.inject([0]) do |breakpoints, t|
-        start_point = breakpoints.last
-        breakpoints.concat(
-          find_end_of(t, string, start_point)
-        )
+      @literal_tokens ||= tokens.select{|t| t.string}
+      @breakpoints ||= Array.new(2*@literal_tokens.size + 2)
+      @breakpoints[0] = 0
+      @breakpoints[-1] = string.length
+      start_point = 0
+      @literal_tokens.each_with_index do |t, i|
+        @breakpoints[2*i+1],start_point = find_end_of(t, string, start_point)
+        @breakpoints[2*i+2] = start_point
       end
-      breakpoints << string.length unless breakpoints.last == string.length
-      breakpoints
+      @breakpoints
     end
 
     def tokenize! string, &block
       @extracted_tokens ||= {}
       @extracted_tokens.clear
+      @tokens_to_extract ||= tokens.select{|t| t.extract?}
 
-      breakpoints = find_breakpoints(string)
-      last_important_bp = [breakpoints.length, tokens.size].min
+      find_breakpoints(string)
+      last_important_bp = [@breakpoints.length, tokens.size].min
       (0...last_important_bp).each do |i|
-        tokens[i].breakpoints = [breakpoints[i], breakpoints[i+1]]
+        tokens[i].breakpoints = [@breakpoints[i], @breakpoints[i+1]]
       end
 
-      @tokens.select{|t| t.extract?}.each do |t|
+      @tokens_to_extract.each do |t|
         @extracted_tokens[t.name] = string[t.breakpoints[0]...t.breakpoints[1]]
       end
 
