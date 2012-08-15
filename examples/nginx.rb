@@ -32,7 +32,7 @@ if __FILE__ == $0
 
   str = '73.80.217.212 - - [01/Aug/2012:09:14:25 -0500] "GET /this_is_a_url HTTP/1.1" 304 152 "http://referrer.com" "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0)" "-" "there could be" other "stuff here"'
   puts "input string: " + str
-  puts "found breakpoints: " + tokenizer.find_breakpoints(str).inspect
+#  puts "found breakpoints: " + tokenizer.find_breakpoints(str).inspect
   puts "Tokens: "
   tokenizer.tokenize!(str) do |tokens|
     tokens.each do |token|

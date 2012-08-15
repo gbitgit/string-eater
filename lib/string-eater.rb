@@ -5,6 +5,7 @@ module StringEater
 
     def initialize
       @opts = {}
+      @breakpoints = [nil,nil]
     end
 
     def extract?
@@ -23,6 +24,7 @@ module StringEater
       t.string = string
       t
     end
+
   end
 
   class Tokenizer
@@ -71,32 +73,75 @@ module StringEater
       end
     end
 
-    def find_breakpoints(string)
-      @literal_tokens ||= tokens.select{|t| t.string}
-      @breakpoints ||= Array.new(2*@literal_tokens.size + 2)
-      @breakpoints[0] = 0
-      @breakpoints[-1] = string.length
-      start_point = 0
-      @literal_tokens.each_with_index do |t, i|
-        @breakpoints[2*i+1], start_point = find_end_of(t, string, start_point)
-        @breakpoints[2*i+2] = start_point
-      end
-      @breakpoints
-    end
-
     def tokenize! string, &block
       @extracted_tokens ||= {}
       @extracted_tokens.clear
-      @tokens_to_extract ||= tokens.select{|t| t.extract?}
+      @tokens_to_find ||= tokens.each_with_index.map do |t, i| 
+        [i, t.string] if t.string
+      end.compact
+      @tokens_to_extract_indeces ||= tokens.each_with_index.map do |t, i|
+        i if t.extract?
+      end.compact
 
-      find_breakpoints(string)
-      last_important_bp = [@breakpoints.length, tokens.size].min
-      (0...last_important_bp).each do |i|
-        tokens[i].breakpoints = [@breakpoints[i], @breakpoints[i+1]]
+      tokens.first.breakpoints[0] = 0
+
+      find_index = 0
+
+      curr_token = @tokens_to_find[find_index]
+      curr_token_index = curr_token[0]
+      curr_token_length = curr_token[1].length
+      looking_for_index = 0
+      looking_for = curr_token[1][looking_for_index]
+
+      puts @tokens_to_find.inspect
+
+      counter = 0
+      string.each_char do |c|
+        puts "'#{c}' == '#{looking_for}'? #{find_index} #{looking_for_index} of #{curr_token_length}"
+        if c == looking_for
+          puts "YES"
+          if looking_for_index == 0
+            # entering new token
+            if curr_token_index > 0
+              t = tokens[curr_token_index - 1]
+              t.breakpoints[1] = counter-1
+              if t.extract?
+                @extracted_tokens[t.name] = string[t.breakpoints[0]..t.breakpoints[1]]
+              end
+            end
+            tokens[curr_token_index].breakpoints[0] = counter
+          end
+          if looking_for_index >= (curr_token_length - 1)
+            puts "A"
+            # leaving token
+            tokens[curr_token_index].breakpoints[1] = counter
+            tokens[curr_token_index + 1].breakpoints[0] = counter + 1
+            
+            # next token
+            find_index += 1
+            if find_index >= @tokens_to_find.length
+              # we're done!
+              break
+            end
+            curr_token = @tokens_to_find[find_index]
+            curr_token_index = curr_token[0]
+            curr_token_length = curr_token[1].length
+            looking_for_index = 0
+          else
+            looking_for_index += 1
+          end
+        end
+        looking_for = curr_token[1][looking_for_index]
+        counter += 1
       end
 
-      @tokens_to_extract.each do |t|
-        @extracted_tokens[t.name] = string[t.breakpoints[0]...t.breakpoints[1]]
+      last_token = tokens.last
+      last_token.breakpoints[1] = string.length - 1
+
+      tokens.each{|t| puts t.inspect}
+
+      if last_token.extract?
+        @extracted_tokens[last_token.name] = string[last_token.breakpoints[0]..last_token.breakpoints[1]]
       end
 
       combined_tokens.each do |combiner|
@@ -112,13 +157,6 @@ module StringEater
       
       # return self for chaining
       self
-    end
-
-    protected
-
-    def find_end_of token, string, start_at
-      start = string.index(token.string, start_at+1) || string.length
-      [start, [start + token.string.length, string.length].min]
     end
 
   end
