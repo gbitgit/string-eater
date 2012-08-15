@@ -9,11 +9,7 @@ class NginxLogTokenizer < StringEater::Tokenizer
   look_for " ["
   add_field :timestamp, :extract => false
   look_for "] \""
-  add_field :request_verb, :extract => false
-  look_for " "
-  add_field :request_url
-  look_for " "
-  add_field :request_etc, :extract => false
+  add_field :request
   look_for "\" "
   add_field :status_code
   look_for " "
@@ -27,7 +23,7 @@ class NginxLogTokenizer < StringEater::Tokenizer
   look_for "\" "
   add_field :remainder
 
-  combine_fields :from => :request_verb, :to => :request_etc, :as => :request
+  #combine_fields :from => :request_verb, :to => :request_etc, :as => :request
 end
 
 if __FILE__ == $0
