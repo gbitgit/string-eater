@@ -13,25 +13,17 @@ class NginxLogTokenizer < StringEater::Tokenizer
   look_for "\" "
   add_field :status, :type => :integer
   look_for " "
-
-  split_field :request do
-    add_field :request_verb
-    look_for " "
-    add_field :request_url
-    look_for " "
-    add_field :request_etc, :extract => false
-  end
 end
 
 tokenizer = NginxLogTokenizer.new
 puts tokenizer.describe_line
 
-#str = "foo - bar [fing] \"futs\" 1234 asdfasdf asdf "
-#puts str
-#puts tokenizer.find_breakpoints(str).inspect
-#tokenizer.tokenize!(str) do |tokens|
-#  puts tokens.inspect
-#end
-#
-#puts tokenizer.ip
+str = "foo - bar [fing] \"futs\" 1234 asdfasdf asdf "
+puts str
+puts tokenizer.find_breakpoints(str).inspect
+tokenizer.tokenize!(str) do |tokens|
+  puts tokens.inspect
+end
+
+puts tokenizer.ip
 

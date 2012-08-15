@@ -5,7 +5,6 @@ module StringEater
 
     def initialize
       @opts = {}
-      @children = []
     end
 
     def extract?
@@ -24,14 +23,12 @@ module StringEater
       t.string = string
       t
     end
-
   end
 
   class Tokenizer
 
     def self.tokens
-      @current_node ||= self.root_token
-      @current_node.children
+      @tokens ||= []
     end
 
     def self.add_field name, opts={}
@@ -43,16 +40,8 @@ module StringEater
       self.tokens << Token::new_separator(tokens)
     end
 
-    def self.split_field parent_name
-      @current_node = self.tokens.find{|t| t.name == parent_name}
-
-      yield
-
-      @current_node = self.root_token
-    end
-
     def tokens
-      @tokens ||= self.class.root_token.children
+      @tokens ||= self.class.tokens
     end
 
     def refresh_tokens
@@ -66,27 +55,6 @@ module StringEater
       end
     end
 
-    def find_breakpoints_for tokens, string, starting_at
-      previous = nil
-      tokens.each do |t|
-        t.breakpoints = [starting_at, nil]
-        if t.children.size > 0
-          starting_at = find_breakpoints_for t.children, string, starting_at
-        else
-          if t.string
-            p1, p2 = find_end_of(t, string, starting_at)
-            if previous
-              previous.breakpoints[1] = p1
-            end
-            t.breakpoints = [p1, p2]
-            starting_at = p2
-          end
-        end
-        previous = t
-      end
-      tokens.last.breakpoints[1]
-    end
-
     def find_breakpoints(string)
       breakpoints = tokens.select{|t| t.string }.inject([0]) do |breakpoints, t|
         start_point = breakpoints.last
@@ -95,7 +63,6 @@ module StringEater
         )
       end
       breakpoints << string.length unless breakpoints.last == string.length
-      breakpoints
     end
 
     def tokenize! string, &block
@@ -121,10 +88,6 @@ module StringEater
     end
 
     protected
-
-    def self.root_token
-      @root_token ||= Token.new
-    end
 
     def find_end_of token, string, start_at
       start = string.index(token.string, start_at) || string.length
