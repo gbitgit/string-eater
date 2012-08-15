@@ -102,13 +102,9 @@ module StringEater
       looking_for_index = 0
       looking_for = curr_token[1][looking_for_index]
 
-      #puts @tokens_to_find.inspect
-
       counter = 0
       string.each_char do |c|
-        #puts "'#{c}' == '#{looking_for}'? #{find_index} #{looking_for_index} of #{curr_token_length}"
         if c == looking_for
-          #puts "YES"
           if looking_for_index == 0
             # entering new token
             if curr_token_index > 0
@@ -121,7 +117,6 @@ module StringEater
             tokens[curr_token_index].breakpoints[0] = counter
           end
           if looking_for_index >= (curr_token_length - 1)
-            #puts "A"
             # leaving token
             tokens[curr_token_index].breakpoints[1] = counter
 
@@ -152,8 +147,6 @@ module StringEater
 
       last_token = tokens.last
       last_token.breakpoints[1] = string.length
-
-      #tokens.each{|t| puts t.inspect}
 
       if last_token.extract?
         @extracted_tokens[last_token.name] = string[last_token.breakpoints[0]..last_token.breakpoints[1]]
