@@ -31,6 +31,10 @@ module StringEater
       @tokens ||= []
     end
 
+    def self.combined_tokens
+      @combined_tokens ||= []
+    end
+
     def self.add_field name, opts={}
       self.tokens << Token::new_field(name, opts)
       define_method(name) {@extracted_tokens[name]}
@@ -40,11 +44,23 @@ module StringEater
       self.tokens << Token::new_separator(tokens)
     end
 
+    def self.combine_fields opts={}
+      from_token_index = self.tokens.index{|t| t.name == opts[:from]}
+      to_token_index = self.tokens.index{|t| t.name == opts[:to]}
+      self.combined_tokens << [opts[:as], from_token_index, to_token_index]
+      define_method(opts[:as]) {@extracted_tokens[opts[:as]]}
+    end
+
     def tokens
       @tokens ||= self.class.tokens
     end
 
+    def combined_tokens
+      @combined_tokens ||= self.class.combined_tokens
+    end
+
     def refresh_tokens
+      @combined_tokens = nil
       @tokens = nil
       tokens
     end
@@ -63,6 +79,7 @@ module StringEater
         )
       end
       breakpoints << string.length unless breakpoints.last == string.length
+      breakpoints
     end
 
     def tokenize! string, &block
@@ -77,6 +94,13 @@ module StringEater
 
       @tokens.select{|t| t.extract?}.each do |t|
         @extracted_tokens[t.name] = string[t.breakpoints[0]...t.breakpoints[1]]
+      end
+
+      combined_tokens.each do |combiner|
+        name = combiner[0]
+        from = @tokens[combiner[1]].breakpoints[0]
+        to = @tokens[combiner[2]].breakpoints[1]
+        @extracted_tokens[name] = string[from...to]
       end
 
       if block_given?

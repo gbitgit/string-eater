@@ -27,7 +27,7 @@ describe Example1 do
   end
 
   describe "tokenize!" do
-    it "should itself" do
+    it "should return itself" do
       @tokenizer.tokenize!(@str1).should == @tokenizer
     end
 
@@ -64,13 +64,15 @@ class Example2 < StringEater::Tokenizer
   look_for " "
   add_field :second_word
   look_for " "
+  add_field :third_word, :extract => false
+  look_for "-"
 end
 
 describe Example2 do
 
   before(:each) do
     @tokenizer = Example2.new
-    @str1 = "foo bar baz"
+    @str1 = "foo bar baz-"
     @second_word1 = "bar"
   end
 
@@ -82,4 +84,39 @@ describe Example2 do
 
 end
 
+# an example where we combine fields
+class Example3 < StringEater::Tokenizer
+  add_field :first_word, :extract => false
+  look_for " \""
+  add_field :part1, :extract => false
+  look_for " "
+  add_field :part2
+  look_for " "
+  add_field :part3, :extract => false
+  look_for "\""
+
+  combine_fields :from => :part1, :to => :part3, :as => :parts
+end
+
+describe Example3 do
+  before(:each) do
+    @tokenizer = Example3.new
+    @str1 = "foo \"bar baz bang\""
+    @part2 = "baz"
+    @parts = "bar baz bang"
+  end
+
+  it "should extract like normal" do
+    @tokenizer.tokenize!(@str1).part2.should == @part2
+  end
+
+  it "should ignore like normal" do
+    @tokenizer.tokenize!(@str1).part1.should be_nil
+  end
+
+  it "should extract the combined field" do
+    @tokenizer.tokenize!(@str1).parts.should == @parts
+  end
+
+end
 
