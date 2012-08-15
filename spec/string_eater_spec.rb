@@ -1,6 +1,12 @@
 require 'spec_helper'
 require 'string-eater'
 
+describe StringEater do
+  it "should have a version" do
+    StringEater::VERSION::STRING.split(".").size.should >= 3
+  end
+end
+
 # normal use
 class Example1 < StringEater::Tokenizer
   add_field :first_word
