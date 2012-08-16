@@ -1,0 +1,4 @@
+ext/string-eater/Makefile
+ext/string-eater/*.o
+ext/string-eater/*.bundle
+ext/string-eater/*.so
