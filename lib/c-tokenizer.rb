@@ -25,6 +25,25 @@ class StringEater::CTokenizer
     define_method(opts[:as]) {@extracted_tokens[opts[:as]]}
   end
 
+  def initialize
+    setup_c_tokenizer
+  end
+
+  def setup_c_tokenizer
+    @combined_tokens = nil
+    @tokens = nil
+    @tokens_to_find = tokens.each_with_index.map do |t, i|
+      [i, t.string] if t.string
+    end.compact
+
+    @tokens_to_extract = tokens.each_with_index.map do |t, i|
+      [i, t.name] if t.extract?
+    end.compact
+
+    # (re)initializes the c extension
+    do_ext_setup(@tokens_to_find, @tokens_to_extract)
+  end
+
   def tokens
     @tokens ||= self.class.tokens
   end
@@ -34,8 +53,7 @@ class StringEater::CTokenizer
   end
 
   def refresh_tokens
-    @combined_tokens = nil
-    @tokens = nil
+    setup_c_tokenizer
     tokens
   end
 
@@ -54,5 +72,8 @@ class StringEater::CTokenizer
   end
 
   def tokenize! string, &block
+    @string = string
+    @extracted_tokens ||= {}
+    @extracted_tokens.clear
   end 
 end
