@@ -14,6 +14,8 @@ static VALUE rb_mStringEater;
 
 static t_literal_token* g_pLiterals;
 
+#define GET_SUBARRAY_ELEMENT(ary, i, j) RARRAY_PTR(RARRAY_PTR(ary)[i])[j]
+
 static VALUE setup(VALUE self, VALUE tokens_to_find, VALUE tokens_to_extract)
 {
   struct RArray* literals = RARRAY(tokens_to_find);
@@ -27,8 +29,8 @@ static VALUE setup(VALUE self, VALUE tokens_to_find, VALUE tokens_to_extract)
   for(i = 0; i < n_literals; i++)
   {
     printf("Lilteral %ld:\n", i);
-    g_pLiterals[i].orig_id = NUM2INT(RARRAY_PTR(RARRAY_PTR(tokens_to_find)[i])[0]);
-    g_pLiterals[i].string = StringValueCStr(RARRAY_PTR(RARRAY_PTR(tokens_to_find)[i])[1]);
+    g_pLiterals[i].orig_id = NUM2INT(GET_SUBARRAY_ELEMENT(tokens_to_find, i, 0));
+    g_pLiterals[i].string = StringValueCStr(GET_SUBARRAY_ELEMENT(tokens_to_find, i, 1));
     g_pLiterals[i].length = strlen(g_pLiterals[i].string);
     printf("  orig_id: %d\n", g_pLiterals[i].orig_id);
     printf("  string: '%s'\n", g_pLiterals[i].string);
