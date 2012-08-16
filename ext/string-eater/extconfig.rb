@@ -1,2 +1,2 @@
 require 'mkmf'
-create_makefile('string-eater')
+create_makefile('c_tokenizer_ext')

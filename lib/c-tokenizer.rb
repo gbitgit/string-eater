@@ -1,3 +1,5 @@
+require 'c_tokenizer_ext'
+
 class StringEater::CTokenizer
   def self.tokens
     @tokens ||= []
