@@ -9,10 +9,17 @@ typedef struct t_literal_token
   unsigned int length;
 } t_literal_token;
 
+typedef struct t_extract_token
+{
+  unsigned int orig_id;
+  VALUE name;
+} t_extract_token;
+
 static VALUE rb_cCTokenizer;
 static VALUE rb_mStringEater;
 
-static t_literal_token* g_pLiterals;
+static t_literal_token* g_pLiterals = 0;
+static t_extract_token* g_pExtracts = 0;
 
 #define GET_SUBARRAY_ELEMENT(ary, i, j) RARRAY_PTR(RARRAY_PTR(ary)[i])[j]
 
@@ -20,11 +27,22 @@ static VALUE setup(VALUE self, VALUE tokens_to_find, VALUE tokens_to_extract)
 {
   struct RArray* literals = RARRAY(tokens_to_find);
   long n_literals;
+  long n_to_extract;
   long i;
   
   n_literals = RARRAY_LEN(tokens_to_find);
+  n_to_extract = RARRAY_LEN(tokens_to_extract);
 
-  g_pLiterals = (t_literal_token *)calloc(n_literals, sizeof(t_literal_token));
+  if(g_pLiterals || g_pExtracts)
+  {
+    fprintf(stderr, "ERRROR: already initialized\n");
+    return Qnil;
+  }
+
+  g_pLiterals = (t_literal_token *)calloc(n_literals, 
+      sizeof(t_literal_token));
+  g_pExtracts = (t_extract_token *)calloc(n_to_extract,
+      sizeof(t_extract_token));
 
   for(i = 0; i < n_literals; i++)
   {
