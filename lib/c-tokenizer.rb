@@ -26,26 +26,11 @@ class StringEater::CTokenizer
   end
 
   def initialize
-    setup_c_tokenizer
-  end
-
-  def setup_c_tokenizer
-    @combined_tokens = nil
-    @tokens = nil
-    @tokens_to_find = tokens.each_with_index.map do |t, i|
-      [i, t.string] if t.string
-    end.compact
-
-    @tokens_to_extract = tokens.each_with_index.map do |t, i|
-      [i, t.name] if t.extract?
-    end.compact
-
-    # (re)initializes the c extension
-    do_ext_setup(@tokens_to_find, @tokens_to_extract)
+    refresh_tokens
   end
 
   def tokens
-    @tokens ||= self.class.tokens
+    @tokens
   end
 
   def combined_tokens
@@ -53,8 +38,22 @@ class StringEater::CTokenizer
   end
 
   def refresh_tokens
-    setup_c_tokenizer
-    tokens
+    @tokens = self.class.tokens
+    tokens_to_find = tokens.each_with_index.map do |t, i|
+      [i, t.string] if t.string
+    end.compact
+
+    @tokens_to_find_indexes = tokens_to_find.map{|t| t[0]}
+    @tokens_to_find_strings = tokens_to_find.map{|t| t[1]}
+
+    tokens_to_extract = tokens.each_with_index.map do |t, i|
+      [i, t.name] if t.extract?
+    end.compact
+
+    @tokens_to_extract_indexes = tokens_to_extract.map{|t| t[0]}
+    @tokens_to_extract_names = tokens_to_extract.map{|t| t[1]}
+
+    @combined_tokens = nil
   end
 
   def describe_line
@@ -75,5 +74,11 @@ class StringEater::CTokenizer
     @string = string
     @extracted_tokens ||= {}
     @extracted_tokens.clear
+
+    @extracted_tokens = ctokenize!(@string, 
+                                   @tokens_to_find_indexes,
+                                   @tokens_to_find_strings,
+                                   @tokens_to_extract_indexes,
+                                   @tokens_to_extract_names)
   end 
 end

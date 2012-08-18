@@ -1,77 +1,84 @@
 #include <ruby.h>
 
-#define MAX_LITERAL_LENGTH 100
-
-typedef struct t_literal_token
-{
-  unsigned int orig_id;
-  const char* string;
-  unsigned int length;
-} t_literal_token;
-
-typedef struct t_extract_token
-{
-  unsigned int orig_id;
-  VALUE name;
-} t_extract_token;
-
 static VALUE rb_cCTokenizer;
 static VALUE rb_mStringEater;
 
-static t_literal_token* g_pLiterals = 0;
-static t_extract_token* g_pExtracts = 0;
-
-#define GET_SUBARRAY_ELEMENT(ary, i, j) RARRAY_PTR(RARRAY_PTR(ary)[i])[j]
-
-static VALUE setup(VALUE self, VALUE tokens_to_find, VALUE tokens_to_extract)
-{
-  struct RArray* literals = RARRAY(tokens_to_find);
-  long n_literals;
-  long n_to_extract;
-  long i;
-  
-  n_literals = RARRAY_LEN(tokens_to_find);
-  n_to_extract = RARRAY_LEN(tokens_to_extract);
-
-  if(g_pLiterals || g_pExtracts)
-  {
-    fprintf(stderr, "ERRROR: already initialized\n");
-    return Qnil;
-  }
-
-  g_pLiterals = (t_literal_token *)calloc(n_literals, 
-      sizeof(t_literal_token));
-  g_pExtracts = (t_extract_token *)calloc(n_to_extract,
-      sizeof(t_extract_token));
-
-  for(i = 0; i < n_literals; i++)
-  {
-    printf("Lilteral %ld:\n", i);
-    g_pLiterals[i].orig_id = NUM2INT(GET_SUBARRAY_ELEMENT(tokens_to_find, i, 0));
-    g_pLiterals[i].string = StringValueCStr(GET_SUBARRAY_ELEMENT(tokens_to_find, i, 1));
-    g_pLiterals[i].length = strlen(g_pLiterals[i].string);
-    printf("  orig_id: %d\n", g_pLiterals[i].orig_id);
-    printf("  string: '%s'\n", g_pLiterals[i].string);
-    printf("  length: %d\n", g_pLiterals[i].length);
-  }
-
-  printf("Seting up with %ld literals\n", n_literals);
-
-  return self;
-}
-
-static VALUE tokenize_string(VALUE self, VALUE string)
+static VALUE tokenize_string(VALUE self, 
+    VALUE string,
+    VALUE tokens_to_find_indexes,
+    VALUE tokens_to_find_strings,
+    VALUE tokens_to_extract_indexes,
+    VALUE tokens_to_extract_names)
 {
   const char* input_string = StringValueCStr(string);
-  printf("Got: %s\n", input_string);
+  VALUE extracted_tokens = rb_hash_new();
+  VALUE curr_token;
+  long curr_token_ix;
+  long n_tokens_to_find = RARRAY_LEN(tokens_to_find_indexes);
+  long n_tokens_to_extract = RARRAY_LEN(tokens_to_extract_indexes);
+  size_t str_len = strlen(input_string);
+  size_t ix;
+  char c;
+  char looking_for;
+  size_t looking_for_len;
+  size_t looking_for_ix = 0;
+  long find_ix = 0;
+  const char*  looking_for_token;
 
-  return self;
+  curr_token = rb_ary_entry(tokens_to_find_strings, find_ix);
+  curr_token_ix = rb_ary_entry(tokens_to_find_indexes, find_ix);
+  looking_for_token = StringValueCStr(curr_token);
+  looking_for_len = strlen(looking_for_token);
+  looking_for = looking_for_token[looking_for_ix];
+
+  for(ix = 0; ix < str_len; ix++)
+  {
+    c = input_string[ix];
+    printf("'%c' == '%c'?\n", c, looking_for);
+    if(c == looking_for)
+    {
+      printf("Yes\n");
+      if(looking_for_ix == 0)
+      {
+        /* entering new token */
+        if(curr_token_ix > 0)
+        {
+          /* set breakpoints, decide if we need to extract */
+        }
+      }
+      if(looking_for_ix >= looking_for_len - 1)
+      {
+        /* leaving token */
+
+        /* set breakpoints */
+
+        /* next token */
+        find_ix++;
+        if(find_ix >= n_tokens_to_find)
+        {
+          /* done! */
+          break;
+        }
+        curr_token = rb_ary_entry(tokens_to_find_strings, find_ix);
+        curr_token_ix = rb_ary_entry(tokens_to_find_indexes, find_ix);
+        looking_for_token = StringValueCStr(curr_token);
+        looking_for_len = strlen(looking_for_token);
+        looking_for_ix = 0;
+      }
+      else
+      {
+        looking_for_ix++;
+      }
+      looking_for = looking_for_token[looking_for_ix];
+    }
+  }
+
+  return extracted_tokens;
 }
 
 void finalize_c_tokenizer_ext(VALUE unused)
 {
   /* free memory, etc */
-  free(g_pLiterals);
 }
 
 void Init_c_tokenizer_ext(void)
@@ -80,8 +87,7 @@ void Init_c_tokenizer_ext(void)
   rb_cCTokenizer = rb_define_class_under(rb_mStringEater, 
       "CTokenizer", rb_cObject);
 
-  rb_define_method(rb_cCTokenizer, "ctokenize", tokenize_string, 1);
-  rb_define_method(rb_cCTokenizer, "do_ext_setup", setup, 2);
+  rb_define_method(rb_cCTokenizer, "ctokenize!", tokenize_string, 5);
 
   /* set the callback for when the extension is unloaded */
   rb_set_end_proc(finalize_c_tokenizer_ext, 0);
