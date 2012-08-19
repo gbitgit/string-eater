@@ -6,5 +6,5 @@ module StringEater
 
   autoload :VERSION, 'version'
 
-  class Tokenizer < RubyTokenizer; end
+  class Tokenizer < CTokenizer; end
 end
