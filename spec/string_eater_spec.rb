@@ -1,6 +1,8 @@
 require 'spec_helper'
 require 'string-eater'
 
+TestedClass = StringEater::CTokenizer
+
 describe StringEater do
   it "should have a version" do
     StringEater::VERSION::STRING.split(".").size.should >= 3
@@ -8,7 +10,7 @@ describe StringEater do
 end
 
 # normal use
-class Example1 < StringEater::Tokenizer
+class Example1 < TestedClass
   add_field :first_word
   look_for " "
   add_field :second_word, :extract => false
@@ -65,7 +67,7 @@ describe Example1 do
 end
 
 # an example where we ignore after a certain point in the string
-class Example2 < StringEater::Tokenizer
+class Example2 < TestedClass
   add_field :first_word, :extract => false
   look_for " "
   add_field :second_word
@@ -91,7 +93,7 @@ describe Example2 do
 end
 
 # an example where we combine fields
-class Example3 < StringEater::Tokenizer
+class Example3 < TestedClass
   add_field :first_word, :extract => false
   look_for " \""
   add_field :part1, :extract => false

@@ -1,1 +1,1 @@
-$LOAD_PATH.unshift './lib'
+$LOAD_PATH.concat %w[./lib ./ext/string-eater]
