@@ -51,7 +51,7 @@ class StringEater::CTokenizer
     end.compact
 
     @tokens_to_extract_indexes = tokens_to_extract.map{|t| t[0]}
-    @tokens_to_extract_names = tokens_to_extract.map{|t| t[1]}
+    @tokens_to_extract_names = tokens.map{|t| t.name}
 
     @combined_tokens = nil
   end
@@ -70,15 +70,56 @@ class StringEater::CTokenizer
     end.flatten.uniq
   end
 
+  def set_token_startpoint ix, startpoint
+    @tokens[ix].breakpoints[0] = startpoint
+  end
+
+  def get_token_startpoint ix
+    @tokens[ix].breakpoints[0]
+  end
+
+  def set_token_endpoint ix, endpoint
+    @tokens[ix].breakpoints[1] = endpoint
+  end
+
+  def extract_token? ix
+    @tokens[ix].extract?
+  end
+
   def tokenize! string, &block
     @string = string
     @extracted_tokens ||= {}
     @extracted_tokens.clear
+
+    tokens.first.breakpoints[0] = 0
 
     @extracted_tokens = ctokenize!(@string, 
                                    @tokens_to_find_indexes,
                                    @tokens_to_find_strings,
                                    @tokens_to_extract_indexes,
                                    @tokens_to_extract_names)
+
+#   last_token = tokens.last
+#   last_token.breakpoints[1] = string.length
+
+#   if last_token.extract?
+#     puts "last_token"
+#     puts last_token.breakpoints.inspect
+#     @extracted_tokens[last_token.name] = string[last_token.breakpoints[0]..last_token.breakpoints[1]]
+#   end
+
+    combined_tokens.each do |combiner|
+      name = combiner[0]
+      from = @tokens[combiner[1]].breakpoints[0]
+      to = @tokens[combiner[2]].breakpoints[1]
+      @extracted_tokens[name] = string[from...to]
+    end
+
+    if block_given?
+      yield @extracted_tokens
+    end
+
+    # return self for chaining
+    self
   end 
 end
