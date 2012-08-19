@@ -1,1 +1,0 @@
-cd ext/string-eater/ && ruby extconf.rb && make && cd ../..
