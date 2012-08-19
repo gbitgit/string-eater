@@ -7,6 +7,7 @@ class Tester < StringEater::CTokenizer
   look_for " "
   add_field :second
   look_for ", "
+  add_field :third
 end
 
 class Tester2 < StringEater::CTokenizer
@@ -20,8 +21,18 @@ end
 t = Tester.new
 t2 = Tester2.new
 
-puts t.tokenize!("Foo Bar, stuff").inspect
+s = "Foo Bar, stuff"
+t.tokenize!(s) do |t|
+  t.each_pair{|k,v| puts "#{k}: #{v}"}
+end
+puts s
+puts t.find_breakpoints(s).inspect
 
 puts "----"
 
-puts t2.tokenize!("[Bar | Baz]").inspect
+s = "[Bar | Baz]"
+t2.tokenize!(s) do |t|
+  t.each_pair{|k,v| puts "#{k}: #{v}"}
+end
+puts s
+puts t2.find_breakpoints(s).inspect
