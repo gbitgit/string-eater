@@ -1,8 +1,9 @@
 $: << File.expand_path(File.join(File.dirname(__FILE__), '..', 'lib'))
+$: << File.expand_path(File.join(File.dirname(__FILE__), '..', 'ext/string-eater'))
 
 require 'string-eater'
 
-class NginxLogTokenizer < StringEater::Tokenizer
+class NginxLogTokenizer < StringEater::CTokenizer
   add_field :ip
   look_for " - "
   add_field :remote_user, :extract => false
