@@ -9,22 +9,6 @@
 static VALUE rb_cCTokenizer;
 static VALUE rb_mStringEater;
 
-static unsigned char should_extract_token(VALUE tokens_to_extract_indexes, 
-    long n_tokens_to_extract,
-    long token_ix, 
-    long last_token_extracted_ix)
-{
-  long ix;
-  for(ix = last_token_extracted_ix + 1; ix < n_tokens_to_extract; ix++)
-  {
-    if(token_ix == NUM2UINT(rb_ary_entry(tokens_to_extract_indexes, ix)))
-    {
-      return 1;
-    }
-  }
-  return 0;
-}
-
 static VALUE tokenize_string(VALUE self, 
     VALUE string,
     VALUE tokens_to_find_indexes,
@@ -50,7 +34,9 @@ static VALUE tokenize_string(VALUE self,
   size_t startpoint = 0;
 
   long n_tokens_to_extract = RARRAY_LEN(tokens_to_extract_indexes);
-  long last_token_extracted_ix = -1;
+  long last_token_extracted_ix = 0;
+
+  long next_token_to_extract_ix = NUM2UINT(rb_ary_entry(tokens_to_extract_indexes, last_token_extracted_ix));
 
   curr_token = rb_ary_entry(tokens_to_find_strings, find_ix);
   curr_token_ix = NUM2UINT(rb_ary_entry(tokens_to_find_indexes, find_ix));
@@ -69,12 +55,17 @@ static VALUE tokenize_string(VALUE self,
         if(curr_token_ix > 0)
         {
           /* extract, if necessary */
-          if(should_extract_token(tokens_to_extract_indexes,
-                n_tokens_to_extract,
-                curr_token_ix - 1,
-                last_token_extracted_ix))
+          if((curr_token_ix - 1) == next_token_to_extract_ix)
           {
-            last_token_extracted_ix = curr_token_ix - 1;
+            last_token_extracted_ix++;
+            if(last_token_extracted_ix < n_tokens_to_extract)
+            {
+              next_token_to_extract_ix = NUM2UINT(rb_ary_entry(tokens_to_extract_indexes, last_token_extracted_ix));
+            }
+            else
+            {
+              next_token_to_extract_ix = -1;
+            }
             rb_hash_aset(extracted_tokens,
                 rb_ary_entry(tokens_to_extract_names, curr_token_ix - 1),
                 rb_usascii_str_new(input_string + startpoint,
@@ -121,10 +112,7 @@ static VALUE tokenize_string(VALUE self,
   ix = str_len;
   curr_token_ix = n_tokens - 1;
 
-  if(should_extract_token(tokens_to_extract_indexes,
-        n_tokens_to_extract,
-        curr_token_ix,
-        last_token_extracted_ix))
+  if(curr_token_ix == next_token_to_extract_ix)
   {
     rb_hash_aset(extracted_tokens,
         rb_ary_entry(tokens_to_extract_names, curr_token_ix),
