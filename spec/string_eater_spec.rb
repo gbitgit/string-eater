@@ -30,7 +30,7 @@ describe Example1 do
 
   describe "find_breakpoints" do
     it "should return an array of the breakpoints" do
-      @tokenizer.find_breakpoints(@str1).should == @bp1
+      @tokenizer.find_breakpoints(@str1).should == @bp1 if @tokenizer.respond_to?(:find_breakpoints)
     end
   end
 
@@ -92,39 +92,42 @@ describe Example2 do
 
 end
 
-# an example where we combine fields
-class Example3 < TestedClass
-  add_field :first_word, :extract => false
-  look_for " \""
-  add_field :part1, :extract => false
-  look_for " "
-  add_field :part2
-  look_for " "
-  add_field :part3, :extract => false
-  look_for "\""
+# CTokenizer doesn't do combine_fields because
+#  writing out breakpoints is a significant slow-down
+if TestedClass.respond_to?(:combine_fields)
+  # an example where we combine fields
+  class Example3 < TestedClass
+    add_field :first_word, :extract => false
+    look_for " \""
+    add_field :part1, :extract => false
+    look_for " "
+    add_field :part2
+    look_for " "
+    add_field :part3, :extract => false
+    look_for "\""
 
-  combine_fields :from => :part1, :to => :part3, :as => :parts
+    combine_fields :from => :part1, :to => :part3, :as => :parts
+  end
+
+  describe Example3 do
+    before(:each) do
+      @tokenizer = Example3.new
+      @str1 = "foo \"bar baz bang\""
+      @part2 = "baz"
+      @parts = "bar baz bang"
+    end
+
+    it "should extract like normal" do
+      @tokenizer.tokenize!(@str1).part2.should == @part2
+    end
+
+    it "should ignore like normal" do
+      @tokenizer.tokenize!(@str1).part1.should be_nil
+    end
+
+    it "should extract the combined field" do
+      @tokenizer.tokenize!(@str1).parts.should == @parts
+    end
+
+  end
 end
-
-describe Example3 do
-  before(:each) do
-    @tokenizer = Example3.new
-    @str1 = "foo \"bar baz bang\""
-    @part2 = "baz"
-    @parts = "bar baz bang"
-  end
-
-  it "should extract like normal" do
-    @tokenizer.tokenize!(@str1).part2.should == @part2
-  end
-
-  it "should ignore like normal" do
-    @tokenizer.tokenize!(@str1).part1.should be_nil
-  end
-
-  it "should extract the combined field" do
-    @tokenizer.tokenize!(@str1).parts.should == @parts
-  end
-
-end
-
