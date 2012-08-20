@@ -93,6 +93,8 @@ static VALUE tokenize_string(VALUE self,
   const char*  looking_for_token;
   unsigned int n_tokens = (unsigned int)RARRAY_LEN(rb_iv_get(self, "@tokens"));
 
+  size_t startpoint = 0;
+
   curr_token = rb_ary_entry(tokens_to_find_strings, find_ix);
   curr_token_ix = NUM2UINT(rb_ary_entry(tokens_to_find_indexes, find_ix));
   looking_for_token = StringValueCStr(curr_token);
@@ -114,8 +116,6 @@ static VALUE tokenize_string(VALUE self,
           if(should_extract_token(self, curr_token_ix - 1))
           {
             /* need to fetch the startpoint */
-            size_t startpoint = get_token_startpoint(self, curr_token_ix - 1);
-
             rb_hash_aset(extracted_tokens,
                 rb_ary_entry(tokens_to_extract_names, curr_token_ix - 1),
                 rb_usascii_str_new(input_string + startpoint,
@@ -123,6 +123,7 @@ static VALUE tokenize_string(VALUE self,
           }
         }
         set_token_startpoint(self, curr_token_ix, ix);
+        startpoint = ix;
       }
       if(looking_for_ix >= looking_for_len - 1)
       {
@@ -136,6 +137,7 @@ static VALUE tokenize_string(VALUE self,
         else
         {
           set_token_startpoint(self, curr_token_ix + 1, ix + 1);
+          startpoint = ix + 1;
         }
 
 
@@ -167,7 +169,6 @@ static VALUE tokenize_string(VALUE self,
 
   if(should_extract_token(self, curr_token_ix))
   {
-    size_t startpoint = get_token_startpoint(self, curr_token_ix);
     rb_hash_aset(extracted_tokens,
         rb_ary_entry(tokens_to_extract_names, curr_token_ix),
         rb_usascii_str_new(input_string + startpoint,
