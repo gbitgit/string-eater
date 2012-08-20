@@ -24,6 +24,27 @@ class NginxLogTokenizer < StringEater::CTokenizer
   add_field :compression, :extract => false
   look_for "\" "
   add_field :remainder
+
+  def status_code
+    @extracted_tokens[:status_code].to_i
+  end
+
+  def request_verb
+    @extracted_tokens[:request_verb]
+  end
+
+  def request_url
+    @extracted_tokens[:request_url]
+  end
+
+  def do_extra_parsing
+    return unless @extracted_tokens[:request]
+    request_parts = @extracted_tokens[:request].split
+    if request_parts.size == 3
+      @extracted_tokens[:request_verb] = request_parts[0]
+      @extracted_tokens[:request_url] = request_parts[1]
+    end
+  end
 end
 
 if __FILE__ == $0
@@ -45,4 +66,5 @@ if __FILE__ == $0
   # use the token's name as a method to get its value
   puts tokenizer.ip
   puts tokenizer.status_code
+  puts tokenizer.request_verb
 end

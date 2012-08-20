@@ -14,7 +14,7 @@ describe NginxLogTokenizer do
    {
       :ip => "73.80.217.212",
       :request => "GET /this_is_a_url HTTP/1.1",
-      :status_code => "304",
+      :status_code => 304,
       :referrer_url => "http://referrer.com",
       :user_agent => "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0)",
       :remainder => "\"there could be\" other \"stuff here\"",
