@@ -96,7 +96,6 @@ class StringEater::CTokenizer
     @extracted_tokens = ctokenize!(@string, 
                                    @tokens_to_find_indexes,
                                    @tokens_to_find_strings,
-                                   @tokens_to_extract_indexes,
                                    @tokens_to_extract_names)
 
 #   last_token = tokens.last

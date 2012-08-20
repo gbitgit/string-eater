@@ -76,7 +76,6 @@ static VALUE tokenize_string(VALUE self,
     VALUE string,
     VALUE tokens_to_find_indexes,
     VALUE tokens_to_find_strings,
-    VALUE tokens_to_extract_indexes,
     VALUE tokens_to_extract_names)
 {
   const char* input_string = StringValueCStr(string);
@@ -84,7 +83,6 @@ static VALUE tokenize_string(VALUE self,
   VALUE curr_token;
   unsigned int curr_token_ix;
   long n_tokens_to_find = RARRAY_LEN(tokens_to_find_indexes);
-  long n_tokens_to_extract = RARRAY_LEN(tokens_to_extract_indexes);
   size_t str_len = strlen(input_string);
   size_t ix;
   char c;
@@ -104,11 +102,8 @@ static VALUE tokenize_string(VALUE self,
   for(ix = 0; ix < str_len; ix++)
   {
     c = input_string[ix];
-    // printf("'%c' == '%c'?\n", c, looking_for);
-    // printf("find_ix = %d, curr_token_ix = %d\n", find_ix, curr_token_ix);
     if(c == looking_for)
     {
-      // printf("Yes\n");
       if(looking_for_ix == 0)
       {
         /* entering new token */
@@ -193,7 +188,7 @@ void Init_c_tokenizer_ext(void)
   rb_cCTokenizer = rb_define_class_under(rb_mStringEater, 
       "CTokenizer", rb_cObject);
 
-  rb_define_method(rb_cCTokenizer, "ctokenize!", tokenize_string, 5);
+  rb_define_method(rb_cCTokenizer, "ctokenize!", tokenize_string, 4);
 
   /* set the callback for when the extension is unloaded */
   rb_set_end_proc(finalize_c_tokenizer_ext, 0);
