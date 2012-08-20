@@ -115,7 +115,7 @@ Soon I'll add some code here to run your own benchmarks.
 
 I've run my own benchmarks comparing String Eater to some code that does the
 same task (both tokenizing nginx log lines) using Ruby regular expressions.  So
-far, String Eater is about 300% faster; able to process about 150,000 lines per
+far, String Eater is about 200% faster; able to process over 100,000 lines per
 second on my laptop vs less than 50,000 lines per second for the regular
 expression version.  I'm working to further optimize the String Eater code.
 
