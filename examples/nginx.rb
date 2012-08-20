@@ -44,4 +44,5 @@ if __FILE__ == $0
 
   # use the token's name as a method to get its value
   puts tokenizer.ip
+  puts tokenizer.status_code
 end
