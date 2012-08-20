@@ -18,7 +18,11 @@ implemenatations that provide support for C extensions.
 
 ## Installation
 
-We'll publish this gem soon, but for now you can clone and install as
+If your system is set up to allow it, you can just do
+
+    gem install string-eater
+
+Or,  if you prefer a more hands-on approach or want to hack at the source:
 
     git clone git://github.com/dantswain/string-eater.git 
     cd string-eater 
