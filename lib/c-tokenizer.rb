@@ -45,6 +45,9 @@ class StringEater::CTokenizer
     end
   end
 
+  def do_extra_parsing
+  end
+
   def tokenize! string, &block
     @string = string
     @extracted_tokens ||= {}
@@ -57,6 +60,9 @@ class StringEater::CTokenizer
                                    @tokens_to_find_strings,
                                    @tokens_to_extract_indexes,
                                    @tokens_to_extract_names)
+
+    # extra parsing hook
+    do_extra_parsing
 
     if block_given?
       yield @extracted_tokens
