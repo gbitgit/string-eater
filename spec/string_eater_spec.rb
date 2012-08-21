@@ -24,6 +24,7 @@ describe Example1 do
     @tokenizer = Example1.new
     @str1 = "foo bar|baz"
     @first_word1 = "foo"
+    @second_word1 = "bar"
     @third_word1 = "baz"
     @bp1 = [0, 3,4,7,8,11]
   end
@@ -31,6 +32,36 @@ describe Example1 do
   describe "find_breakpoints" do
     it "should return an array of the breakpoints" do
       @tokenizer.find_breakpoints(@str1).should == @bp1 if @tokenizer.respond_to?(:find_breakpoints)
+    end
+  end
+
+  describe "#extract_all_fields" do
+    it "should extract all of the fields" do
+      @tokenizer.extract_all_fields
+      @tokenizer.tokenize!(@str1)
+      @tokenizer.first_word.should == @first_word1
+      @tokenizer.second_word.should == @second_word1
+      @tokenizer.third_word.should == @third_word1
+    end
+  end
+
+  describe "#extract_no_fields" do
+    it "should not extract any of the fields" do
+      @tokenizer.extract_no_fields
+      @tokenizer.tokenize!(@str1)
+      @tokenizer.first_word.should be_nil
+      @tokenizer.second_word.should be_nil
+      @tokenizer.third_word.should be_nil
+    end
+  end
+
+  describe "#extract_fields" do
+    it "should allow us to set which fields get extracted" do
+      @tokenizer.extract_fields :second_word
+      @tokenizer.tokenize!(@str1)
+      @tokenizer.first_word.should be_nil
+      @tokenizer.second_word.should == @second_word1
+      @tokenizer.third_word.should be_nil
     end
   end
 
