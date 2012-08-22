@@ -74,7 +74,7 @@ Then, we can tokenize the string like this:
     string = "Flinstone, Fred | 301 Cobblestone Way, Bedrock, NA, 00000" 
     tokenizer.tokenize! string
 
-    puts tokenizer.last_name # => "Flinestone" 
+    puts tokenizer.last_name # => "Flinstone" 
     puts tokenizer.city      # => "Bedrock" 
     puts tokenizer.state     # => "NA"
 
