@@ -109,15 +109,14 @@ static VALUE tokenize_string(VALUE self,
     }
   }
 
-  ix = str_len;
   curr_token_ix = n_tokens - 1;
 
-  if(curr_token_ix == next_token_to_extract_ix)
+  if(ix < str_len && curr_token_ix == next_token_to_extract_ix)
   {
     rb_hash_aset(extracted_tokens,
         rb_ary_entry(tokens_to_extract_names, curr_token_ix),
         rb_usascii_str_new(input_string + startpoint,
-          ix - startpoint));
+          str_len - startpoint));
   }
 
   return extracted_tokens;

@@ -93,6 +93,12 @@ describe Example1 do
       @tokenizer.tokenize!("a b|#{s}").third_word.should == s
     end
 
+    it "should work if the last delimeter is missing and the second-to-last field is not used" do
+      s = "a b"
+#      @tokenizer.extract_all_fields
+      @tokenizer.tokenize!(s).third_word.should be_nil
+    end
+
   end
 
 end

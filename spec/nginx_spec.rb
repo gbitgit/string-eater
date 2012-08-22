@@ -9,6 +9,7 @@ describe NginxLogTokenizer do
   before(:each) do
     @tokenizer = NginxLogTokenizer.new
     @str = '73.80.217.212 - - [01/Aug/2012:09:14:25 -0500] "GET /this_is_a_url HTTP/1.1" 304 152 "http://referrer.com" "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0)" "-" "there could be" other "stuff here"'
+    @str2 = '73.80.217.212 - - [01/Aug/2012:09:14:25 -0500] "GET /this_is_a_url HTTP/1.1" 304 152 "http://referrer.com" "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0)" "-"'
    end
 
    {
@@ -22,6 +23,10 @@ describe NginxLogTokenizer do
         it "should find the right value for #{token}" do
           @tokenizer.tokenize!(@str).send(token).should == val
         end
+      end
+
+      it "should handle there not being a remainder correctly" do
+        @tokenizer.tokenize!(@str2).remainder.should be_nil
       end
 
 end
