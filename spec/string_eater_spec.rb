@@ -129,6 +129,29 @@ describe Example2 do
 
 end
 
+# an example where the split is more than one char
+class Example3 < TestedClass
+  look_for "foo="
+  add_field :foo_val
+  look_for "&"
+end
+
+describe Example3 do
+  before(:each) do
+    @tokenizer = Example3.new
+  end
+
+  describe "tokenize!" do
+    it "should find the token if there is only one occurrence of the characters in the separator" do
+      @tokenizer.tokenize!("abcd?foo=val&blah").foo_val.should == "val"
+    end
+
+    it "should still work if part of the separator token occurs" do
+      @tokenizer.tokenize!("abcd?foo_blah=baz&foo=bar&buh").foo_val.should == "bar"
+    end
+  end
+end
+
 # CTokenizer doesn't do combine_fields because
 #  writing out breakpoints is a significant slow-down
 if TestedClass.respond_to?(:combine_fields)

@@ -107,6 +107,12 @@ static VALUE tokenize_string(VALUE self,
       }
       looking_for = looking_for_token[looking_for_ix];
     }
+    else
+    {
+      /* reset token (or just keep looking, which is also fine) */
+      looking_for_ix = 0;
+      looking_for = looking_for_token[looking_for_ix];
+    }
   }
 
   curr_token_ix = n_tokens - 1;

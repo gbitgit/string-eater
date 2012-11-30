@@ -2,7 +2,7 @@ module StringEater
   module VERSION 
     MAJOR = 0
     MINOR = 2
-    PATCH = 1
+    PATCH = 2
     PRE   = nil
     STRING = [MAJOR, MINOR, PATCH, PRE].compact.join('.')
   end
